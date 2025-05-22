@@ -1,0 +1,34 @@
+{
+  "name": "@verbaltest/playwright-fixtures",
+  "version": "0.1.0",
+  "description": "Custom fixtures support for Playwright meta framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts",
+    "test": "playwright test"
+  },
+  "keywords": [
+    "playwright",
+    "testing",
+    "fixtures",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@verbaltest/playwright-core": "workspace:*",
+    "@verbaltest/playwright-decorators": "workspace:*"
+  },
+  "peerDependencies": {
+    "@playwright/test": "^1.40.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2"
+  }
+}
