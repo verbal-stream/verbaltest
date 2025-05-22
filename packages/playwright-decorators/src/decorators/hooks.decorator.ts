@@ -1,101 +1,124 @@
 import { HookOptions, getMetadataStorage } from '@verbaltest/playwright-core';
 
+type TestMethod = (args: any, testInfo?: any) => void | Promise<void>;
+
 /**
- * Base hook decorator factory
+ * Run method before all tests in the suite.
+ * Target class should be marked by @suite decorator.
  * 
- * @param hookName Name of the hook
- * @param options Hook options
- * @returns Method decorator
+ * @example
+ * ```
+ * @suite()
+ * class MyTestSuite {
+ *   @beforeAll()
+ *   async setup() {
+ *     // Setup logic that runs once before all tests
+ *   }
+ * }
+ * ```
  */
-function createHookDecorator(hookName: string, options: HookOptions = {}) {
-  return function(target: any, propertyKey: string | symbol, descriptor?: PropertyDescriptor) {
-    // For class methods in experimental decorators mode
-    if (descriptor) {
-      const originalMethod = descriptor.value;
-      
-      // Store metadata for the hook
-      getMetadataStorage().store(originalMethod, {
-        type: 'hook',
-        name: hookName,
-        options
-      });
-      
-      return descriptor;
-    }
+export function beforeAll(options: HookOptions = {}) {
+  return function(target: any, propertyKey?: string | symbol, descriptor?: PropertyDescriptor): any {
+    const originalMethod = descriptor?.value || target;
     
-    // For property decorators or other cases
-    return target;
+    // Store metadata for the hook
+    getMetadataStorage().store(originalMethod, {
+      type: 'hook',
+      name: 'beforeAll',
+      options
+    });
+    
+    return descriptor;
   };
 }
 
 /**
- * Decorator for beforeAll hook
+ * Run method before each test in suite.
+ * Target class should be marked by @suite decorator.
  * 
  * @example
  * ```
- * @beforeAll()
- * async setupSuite({ page }) {
- *   // ...
+ * @suite()
+ * class MyTestSuite {
+ *   @beforeEach()
+ *   async setupEach({ page }) {
+ *     // Setup logic that runs before each test
+ *     await page.goto('https://example.com');
+ *   }
  * }
  * ```
- * 
- * @param options Hook options
- * @returns Method decorator
- */
-export function beforeAll(options: HookOptions = {}) {
-  return createHookDecorator('beforeAll', options);
-}
-
-/**
- * Decorator for beforeEach hook
- * 
- * @example
- * ```
- * @beforeEach()
- * async setupTest({ page }) {
- *   // ...
- * }
- * ```
- * 
- * @param options Hook options
- * @returns Method decorator
  */
 export function beforeEach(options: HookOptions = {}) {
-  return createHookDecorator('beforeEach', options);
+  return function(target: any, propertyKey?: string | symbol, descriptor?: PropertyDescriptor): any {
+    const originalMethod = descriptor?.value || target;
+    
+    // Store metadata for the hook
+    getMetadataStorage().store(originalMethod, {
+      type: 'hook',
+      name: 'beforeEach',
+      options
+    });
+    
+    return descriptor;
+  };
 }
 
 /**
- * Decorator for afterAll hook
+ * Run method after each test in suite.
+ * Target class should be marked by @suite decorator.
  * 
  * @example
  * ```
- * @afterAll()
- * async teardownSuite({ page }) {
- *   // ...
+ * @suite()
+ * class MyTestSuite {
+ *   @afterEach()
+ *   async teardownEach({ page }) {
+ *     // Cleanup logic that runs after each test
+ *   }
  * }
  * ```
- * 
- * @param options Hook options
- * @returns Method decorator
- */
-export function afterAll(options: HookOptions = {}) {
-  return createHookDecorator('afterAll', options);
-}
-
-/**
- * Decorator for afterEach hook
- * 
- * @example
- * ```
- * @afterEach()
- * async teardownTest({ page }) {
- *   // ...
- * }
- * ```
- * 
- * @param options Hook options
- * @returns Method decorator
  */
 export function afterEach(options: HookOptions = {}) {
-  return createHookDecorator('afterEach', options);
+  return function(target: any, propertyKey?: string | symbol, descriptor?: PropertyDescriptor): any {
+    const originalMethod = descriptor?.value || target;
+    
+    // Store metadata for the hook
+    getMetadataStorage().store(originalMethod, {
+      type: 'hook',
+      name: 'afterEach',
+      options
+    });
+    
+    return descriptor;
+  };
+}
+
+/**
+ * Run method after all tests in the suite.
+ * Target class should be marked by @suite decorator.
+ * 
+ * @example
+ * ```
+ * @suite()
+ * class MyTestSuite {
+ *   @afterAll()
+ *   async teardown() {
+ *     // Cleanup logic that runs once after all tests
+ *   }
+ * }
+ * ```
+ */
+export function afterAll(options: HookOptions = {}) {
+  return function(target: any, propertyKey?: string | symbol, descriptor?: PropertyDescriptor): any {
+    const originalMethod = descriptor?.value || target;
+    
+    // Store metadata for the hook
+    getMetadataStorage().store(originalMethod, {
+      type: 'hook',
+      name: 'afterAll',
+      options
+    });
+    
+    return descriptor;
+  };
 }

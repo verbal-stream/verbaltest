@@ -1,13 +1,16 @@
-import { TestOptions, getName, getMetadataStorage } from '@verbaltest/playwright-core';
+import { TestOptions, getMetadataStorage } from '@verbaltest/playwright-core';
 
 /**
  * Decorator for marking a method as a test
  * 
  * @example
  * ```
- * @test()
- * async myTest({ page }) {
- *   // ...
+ * @suite()
+ * class MyTestSuite {
+ *   @test()
+ *   async myTest() {
+ *     // ...
+ *   }
  * }
  * ```
  * 
@@ -15,24 +18,19 @@ import { TestOptions, getName, getMetadataStorage } from '@verbaltest/playwright
  * @returns Method decorator
  */
 export function test(options: TestOptions = {}) {
-  return function(target: any, propertyKey: string | symbol, descriptor?: PropertyDescriptor) {
-    // For class methods in experimental decorators mode
-    if (descriptor) {
-      const originalMethod = descriptor.value;
-      const methodName = String(propertyKey);
-      const testName = options.name || methodName;
-      
-      // Store metadata for the test
-      getMetadataStorage().store(originalMethod, {
-        type: 'test',
-        name: testName,
-        options
-      });
-      
-      return descriptor;
-    }
+  return function(target: any, propertyKey?: string | symbol, descriptor?: PropertyDescriptor): any {
+    const originalMethod = descriptor?.value || target;
     
-    // For property decorators or other cases
-    return target;
+    // Get test name from options or method name
+    const testName = options.name || propertyKey?.toString() || originalMethod.name;
+    
+    // Store metadata for the test
+    getMetadataStorage().store(originalMethod, {
+      type: 'test',
+      name: testName,
+      options
+    });
+    
+    return descriptor;
   };
 }
