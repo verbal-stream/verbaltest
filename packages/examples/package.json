@@ -1,0 +1,20 @@
+{
+  "name": "examples",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@playwright/test": "^1.52.0",
+    "@types/node": "^22.15.3",
+    "@verbaltest/playwright-core": "workspace:*",
+    "@verbaltest/playwright-decorators": "workspace:*",
+    "@verbaltest/playwright-fixtures": "workspace:*"
+  }
+}
