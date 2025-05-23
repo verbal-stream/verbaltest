@@ -1,5 +1,6 @@
 import { test, TestType } from '@playwright/test';
 import { SuiteOptions, getName, getMetadataStorage } from '@verbaltest/playwright-core';
+import { processApiRequest } from '../helpers/api-helper';
 
 // Store test suites to avoid duplicate registration
 const registeredSuites = new Set<string>();
@@ -128,6 +129,26 @@ export function suite(options: SuiteOptions = {}) {
             }
             
             if (!instance) instance = new target();
+            
+            // Check if this is an API test with API decorators
+            const apiOptions = testOptions.api;
+            if (apiOptions && apiOptions.method && apiOptions.path) {
+              // Process API request based on decorators
+              const response = await processApiRequest(request, {
+                method: apiOptions.method,
+                path: apiOptions.path,
+                pathParams: apiOptions.pathParams,
+                queryParams: apiOptions.queryParams,
+                headers: apiOptions.headers,
+                body: apiOptions.body,
+                expect: apiOptions.expect
+              });
+              
+              // Pass the response to the test method
+              return await instance[methodName]({ page, request, response });
+            }
+            
+            // Regular test without API decorators
             return await instance[methodName]({ page, request });
           });
         } else if (isSkip) {
@@ -143,6 +164,26 @@ export function suite(options: SuiteOptions = {}) {
             }
             
             if (!instance) instance = new target();
+            
+            // Check if this is an API test with API decorators
+            const apiOptions = testOptions.api;
+            if (apiOptions && apiOptions.method && apiOptions.path) {
+              // Process API request based on decorators
+              const response = await processApiRequest(request, {
+                method: apiOptions.method,
+                path: apiOptions.path,
+                pathParams: apiOptions.pathParams,
+                queryParams: apiOptions.queryParams,
+                headers: apiOptions.headers,
+                body: apiOptions.body,
+                expect: apiOptions.expect
+              });
+              
+              // Pass the response to the test method
+              return await instance[methodName]({ page, request, response });
+            }
+            
+            // Regular test without API decorators
             return await instance[methodName]({ page, request });
           });
         } else {
@@ -158,6 +199,72 @@ export function suite(options: SuiteOptions = {}) {
             }
             
             if (!instance) instance = new target();
+            
+            // Debug logging
+            console.log(`Test method: ${methodName}`);
+            console.log(`Test options:`, testOptions);
+            
+            // Check if this is an API test with API decorators
+            // First try to get API options directly from the method
+            let apiOptions = null;
+            
+            // Try to get API options from all possible locations
+            const methodFn = prototype[methodName];
+            const methodMetadata = getMetadataStorage().get(methodFn);
+            
+            if (methodMetadata?.options?.api) {
+              apiOptions = methodMetadata.options.api;
+            } else if (testOptions.api) {
+              apiOptions = testOptions.api;
+            }
+            
+            // Try to find API options from the class prototype method
+            if (!apiOptions) {
+              // Manually check all decorators on this method
+              const allMetadata = getMetadataStorage().getAll();
+              for (const [key, metadata] of allMetadata.entries()) {
+                if (metadata.options?.api && key.name === methodName) {
+                  apiOptions = metadata.options.api;
+                  break;
+                }
+              }
+            }
+            
+            console.log(`API options:`, apiOptions);
+            
+            // Additional debug logging for API options
+            if (apiOptions) {
+              console.log(`API method: ${apiOptions.method}`);
+              console.log(`API path: ${apiOptions.path}`);
+              console.log(`API path params:`, apiOptions.pathParams);
+              console.log(`API query params:`, apiOptions.queryParams);
+              console.log(`API headers:`, apiOptions.headers);
+              console.log(`API body:`, apiOptions.body);
+              console.log(`API expect:`, apiOptions.expect);
+            }
+            
+            if (apiOptions && apiOptions.method && apiOptions.path) {
+              // Process API request based on decorators
+              try {
+                const response = await processApiRequest(request, {
+                  method: apiOptions.method,
+                  path: apiOptions.path,
+                  pathParams: apiOptions.pathParams,
+                  queryParams: apiOptions.queryParams,
+                  headers: apiOptions.headers,
+                  body: apiOptions.body,
+                  expect: apiOptions.expect
+                });
+                
+                // Pass the response to the test method
+                return await instance[methodName]({ page, request, response });
+              } catch (error) {
+                console.error(`Error processing API request for ${methodName}:`, error);
+                throw error;
+              }
+            }
+            
+            // Regular test without API decorators
             return await instance[methodName]({ page, request });
           });
         }
