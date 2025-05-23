@@ -57,8 +57,15 @@ export async function processApiRequest(
   // Process path parameters
   let url = options.path;
   if (options.pathParams) {
+    console.log('Processing path parameters:', options.pathParams);
     Object.entries(options.pathParams).forEach(([key, value]) => {
-      url = url.replace(`{${key}}`, String(value));
+      const placeholder = `{${key}}`;
+      if (url.includes(placeholder)) {
+        url = url.replace(placeholder, String(value));
+        console.log(`Replaced ${placeholder} with ${value}`);
+      } else {
+        console.warn(`Path parameter ${key} not found in URL: ${url}`);
+      }
     });
   }
   console.log('Processed URL:', url);
