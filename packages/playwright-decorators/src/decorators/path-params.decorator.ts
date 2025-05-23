@@ -28,6 +28,8 @@ export interface PathParams {
  */
 export function PathParams(params: PathParams) {
   return function(target: any, propertyKey?: string | symbol, descriptor?: PropertyDescriptor): any {
+    console.log(`PathParams decorator applied to ${propertyKey ? String(propertyKey) : 'class'}`);
+    
     // Handle both stage 2 and stage 3 decorators
     if (descriptor) {
       // Method decorator (stage 3)
@@ -35,7 +37,7 @@ export function PathParams(params: PathParams) {
       
       // Store metadata for the test
       const metadata = getMetadataStorage().get(originalMethod) || {
-        type: 'test',
+        type: 'test' as const,
         name: String(propertyKey),
         options: {}
       };
@@ -48,16 +50,40 @@ export function PathParams(params: PathParams) {
       // Set path parameters
       metadata.options.api.pathParams = params;
       
+      // Store metadata in multiple places to ensure it can be retrieved
       getMetadataStorage().store(originalMethod, metadata);
       
+      // Store on the descriptor value as well
+      getMetadataStorage().store(descriptor.value, metadata);
+      
+      // Store on the prototype method
+      if (propertyKey) {
+        getMetadataStorage().store(target.constructor.prototype[propertyKey], metadata);
+      }
+      
       return descriptor;
+    } else if (propertyKey && !descriptor) {
+      // Stage 2 decorator (property decorator)
+      const metadata = {
+        type: 'test' as const,
+        name: String(propertyKey),
+        options: { api: { pathParams: params } }
+      };
+      
+      // Store metadata on the property
+      getMetadataStorage().store(target[propertyKey], metadata);
+      
+      // Store on the prototype method
+      getMetadataStorage().store(target.constructor.prototype[propertyKey], metadata);
+      
+      return target[propertyKey];
     } else {
-      // Stage 2 decorator or direct function call
+      // Direct function application or other case
       const originalMethod = target;
       
       // Store metadata for the test
       const metadata = getMetadataStorage().get(originalMethod) || {
-        type: 'test',
+        type: 'test' as const,
         name: originalMethod.name,
         options: {}
       };
