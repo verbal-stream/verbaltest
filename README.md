@@ -1,36 +1,187 @@
-# Turborepo starter
+# VerbalTest
 
-This Turborepo starter is maintained by the Turborepo core team.
+![Version](https://img.shields.io/badge/version-0.1.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## Using this example
+A powerful meta-framework for Playwright that provides elegant decorators for both UI and API testing, making your test code cleaner, more maintainable, and easier to write.
 
-Run the following command:
+## Features
 
-```sh
-npx create-turbo@latest
+- **Decorator-based testing** - Write cleaner, more maintainable tests using TypeScript decorators
+- **UI Testing** - Comprehensive decorators for UI testing with Playwright
+- **API Testing** - Specialized decorators for API testing with built-in request/response handling
+- **Custom Fixtures** - Extend Playwright's fixture system with your own custom fixtures
+- **Test Organization** - Tag, categorize, and organize your tests with built-in decorators
+- **Response Validation** - Validate API responses with schema validation and expectations
+
+## Installation
+
+```bash
+# Install using npm
+npm install @verbaltest/playwright-decorators @verbaltest/playwright-core
+
+# Or using yarn
+yarn add @verbaltest/playwright-decorators @verbaltest/playwright-core
+
+# Or using pnpm
+pnpm add @verbaltest/playwright-decorators @verbaltest/playwright-core
 ```
 
-## What's inside?
+## Quick Start
 
-This Turborepo includes the following packages/apps:
+### UI Testing Example
 
-### Apps and Packages
+```typescript
+import { expect, Page } from '@playwright/test';
+import { suite, test, beforeEach, afterEach, tag, slow } from '@verbaltest/playwright-decorators';
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+@suite()
+class BasicTestSuite {
+  @beforeEach()
+  async setupTest({ page }: { page: Page }) {
+    await page.goto('https://playwright.dev/');
+  }
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+  @test()
+  async hasTitle({ page }: { page: Page }) {
+    await expect(page).toHaveTitle(/Playwright/);
+  }
 
-### Utilities
+  @tag(['regression', 'smoke'])
+  @slow('This test takes longer to run')
+  @test()
+  async getStartedLink({ page }: { page: Page }) {
+    await page.getByRole('link', { name: 'Get started' }).click();
+    await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
+  }
 
-This Turborepo has some additional tools already setup for you:
+  @afterEach()
+  async teardownTest() {
+    console.log('Cleaning up after test');
+  }
+}
+```
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+### API Testing Example
+
+```typescript
+import { expect, APIResponse, APIRequestContext } from '@playwright/test';
+import { 
+  suite, test, ApiEndpoint, PathParams, QueryParams, 
+  Headers, RequestBody, ExpectStatus, ExpectBody, ExpectSchema 
+} from '@verbaltest/playwright-decorators';
+
+const userSchema = {
+  type: 'object',
+  required: ['id', 'name', 'email'],
+  properties: {
+    id: { type: 'number' },
+    name: { type: 'string' },
+    email: { type: 'string' }
+  }
+};
+
+@suite()
+class UserApiTests {
+  @test()
+  @ApiEndpoint('GET', 'https://jsonplaceholder.typicode.com/users/{id}')
+  @PathParams({ id: '1' })
+  @Headers({ 'Accept': 'application/json' })
+  @ExpectStatus(200)
+  @(ExpectBody('name').toBeDefined())
+  @ExpectSchema(userSchema)
+  async getUserTest(args: { response?: APIResponse, request: APIRequestContext }) {
+    const responseBody = await args.response.json();
+    expect(responseBody.id).toBe(1);
+    return args.response;
+  }
+}
+```
+
+## Available Decorators
+
+### Core Decorators
+
+- `@suite()` - Define a test suite class
+- `@test()` - Mark a method as a test
+- `@beforeAll()` - Run before all tests in the suite
+- `@afterAll()` - Run after all tests in the suite
+- `@beforeEach()` - Run before each test
+- `@afterEach()` - Run after each test
+
+### Utility Decorators
+
+- `@tag(['tag1', 'tag2'])` - Add tags to tests for filtering
+- `@slow(reason)` - Mark a test as slow-running
+- `@skip(reason)` - Skip a test
+- `@only()` - Only run this test
+- `@fail(reason)` - Mark a test as expected to fail
+- `@fixme(reason)` - Mark a test as needing fixing
+
+### API Testing Decorators
+
+- `@ApiEndpoint(method, path)` - Define an API endpoint to test
+- `@PathParams(params)` - Add path parameters to the request
+- `@QueryParams(params)` - Add query parameters to the request
+- `@Headers(headers)` - Add headers to the request
+- `@RequestBody(body)` - Add a request body
+- `@ExpectStatus(code)` - Expect a specific status code
+- `@ExpectBody(path).toEqual(value)` - Expect a specific value in the response body
+- `@ExpectSchema(schema)` - Validate response against a JSON schema
+
+## Custom Fixtures
+
+VerbalTest allows you to extend Playwright's fixture system with your own custom fixtures:
+
+```typescript
+import { test as baseTest } from '@playwright/test';
+import { extend } from '@verbaltest/playwright-fixtures';
+
+// Define your fixture type
+type UserFixture = {
+  user: { name: string, role: string }
+};
+
+// Create the fixture
+const withUser = baseTest.extend<UserFixture>({
+  user: async ({ }, use) => {
+    await use({
+      name: 'Test User',
+      role: 'Admin'
+    });
+  }
+});
+
+// Generate decorators with access to the fixture
+const { test: testWithUser } = extend<UserFixture>(withUser);
+
+// Use in your test suite
+@suite()
+class FixtureTestSuite {
+  @testWithUser()
+  async testWithUserFixture({ page, user }) {
+    console.log(`User: ${user.name}, Role: ${user.role}`);
+    // Your test code here
+  }
+}
+```
+
+## Project Structure
+
+This monorepo includes the following packages:
+
+- `packages/playwright-core` - Core functionality and metadata storage
+- `packages/playwright-decorators` - All decorators for UI and API testing
+- `packages/playwright-fixtures` - Custom fixture support
+- `packages/examples` - Example test suites showing usage
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+MIT
 
 ### Build
 
