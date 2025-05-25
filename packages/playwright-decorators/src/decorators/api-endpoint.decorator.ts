@@ -29,7 +29,9 @@ export interface ApiEndpointOptions {
  */
 export function ApiEndpoint(method: string, path: string) {
   return function(target: any, propertyKey?: string | symbol, descriptor?: PropertyDescriptor): any {
-    // Handle both class and method decorators
+    console.log(`ApiEndpoint decorator applied to ${propertyKey ? String(propertyKey) : 'class'}`); 
+    
+    // Handle both stage 2 and stage 3 decorators
     if (descriptor) {
       // Method decorator (stage 3)
       const originalMethod = descriptor.value;
@@ -50,27 +52,65 @@ export function ApiEndpoint(method: string, path: string) {
       metadata.options.api.method = method;
       metadata.options.api.path = path;
       
-      // Store metadata for the test method
+      // Store metadata in multiple places to ensure it can be retrieved
       getMetadataStorage().store(originalMethod, metadata);
       
-      // Store metadata on the prototype method as well for better retrieval
+      // Store on the descriptor value as well
+      getMetadataStorage().store(descriptor.value, metadata);
+      
+      // Store on the prototype method
       if (propertyKey) {
+        // Store on the prototype method
         getMetadataStorage().store(target.constructor.prototype[propertyKey], metadata);
+        
+        // Store directly on the property key for easier lookup
+        const keyMetadata = {
+          type: 'test' as const,
+          name: String(propertyKey),
+          options: { api: { method, path } }
+        };
+        getMetadataStorage().store(propertyKey, keyMetadata);
       }
       
-      // Also store metadata on the target itself to make it easier to find
-      getMetadataStorage().store(target, {
-        type: 'suite', // Use 'suite' type which is valid in MetadataType
+      // Also store metadata on the target class to mark it as having API tests
+      getMetadataStorage().store(target.constructor, {
+        type: 'suite',
         name: target.constructor.name,
         options: { hasApiTests: true }
       });
       
       return descriptor;
+    } else if (propertyKey && !descriptor) {
+      // Stage 2 decorator (property decorator)
+      const metadata = {
+        type: 'test' as const,
+        name: String(propertyKey),
+        options: { api: { method, path } }
+      };
+      
+      // Store metadata on the property
+      getMetadataStorage().store(target[propertyKey], metadata);
+      
+      // Store on the prototype method
+      getMetadataStorage().store(target.constructor.prototype[propertyKey], metadata);
+      
+      // Store directly on the property key
+      getMetadataStorage().store(propertyKey, metadata);
+      
+      return target[propertyKey];
     } else if (typeof target === 'function') {
       // Class decorator
+      console.warn('ApiEndpoint decorator should be applied to methods, not classes');
       return target;
     } else {
-      // Property decorator or other
+      // Direct function application or other case
+      const metadata = {
+        type: 'test' as const,
+        name: target.name || 'unknown',
+        options: { api: { method, path } }
+      };
+      
+      getMetadataStorage().store(target, metadata);
       return target;
     }
   };

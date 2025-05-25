@@ -208,24 +208,59 @@ export function suite(options: SuiteOptions = {}) {
             // First try to get API options directly from the method
             let apiOptions = null;
             
-            // Try to get API options from all possible locations
+            // Enhanced API options retrieval strategy
+            // 1. Try to get from the method function directly
             const methodFn = prototype[methodName];
             const methodMetadata = getMetadataStorage().get(methodFn);
             
             if (methodMetadata?.options?.api) {
+              console.log(`Found API options on method function for ${methodName}`);
               apiOptions = methodMetadata.options.api;
-            } else if (testOptions.api) {
+            } 
+            // 2. Try to get from test options
+            else if (testOptions.api) {
+              console.log(`Found API options in test options for ${methodName}`);
               apiOptions = testOptions.api;
             }
-            
-            // Try to find API options from the class prototype method
-            if (!apiOptions) {
-              // Manually check all decorators on this method
+            // 3. Try to get from the property key
+            else {
+              console.log(`Searching for API options for ${methodName} in all metadata`);
+              // Try to find API options from all possible sources
               const allMetadata = getMetadataStorage().getAll();
+              
+              // First try to match by property key name
               for (const [key, metadata] of allMetadata.entries()) {
-                if (metadata.options?.api && key.name === methodName) {
-                  apiOptions = metadata.options.api;
-                  break;
+                // Check if the key is a string or symbol (property key)
+                if (typeof key === 'string' || typeof key === 'symbol') {
+                  if (String(key) === String(methodName) && metadata.options?.api) {
+                    console.log(`Found API options by property key match for ${methodName}`);
+                    apiOptions = metadata.options.api;
+                    break;
+                  }
+                }
+              }
+              
+              // If still not found, try to match by function name
+              if (!apiOptions) {
+                for (const [key, metadata] of allMetadata.entries()) {
+                  // Check if the key is a function
+                  if (typeof key === 'function' || (key && typeof key === 'object' && typeof key.name === 'string')) {
+                    if (key.name === methodName && metadata.options?.api) {
+                      console.log(`Found API options by function name match for ${methodName}`);
+                      apiOptions = metadata.options.api;
+                      break;
+                    }
+                  }
+                }
+              }
+              
+              // If still not found, try to match by prototype method
+              if (!apiOptions) {
+                const prototypeMethod = target.prototype[methodName];
+                const prototypeMetadata = getMetadataStorage().get(prototypeMethod);
+                if (prototypeMetadata?.options?.api) {
+                  console.log(`Found API options on prototype method for ${methodName}`);
+                  apiOptions = prototypeMetadata.options.api;
                 }
               }
             }
