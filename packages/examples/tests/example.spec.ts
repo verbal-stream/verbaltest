@@ -1,6 +1,6 @@
 import { test as baseTest, expect, Page } from '@playwright/test';
-import { suite, test, beforeAll, afterAll, beforeEach, afterEach, tag, slow } from '@verbaltest/playwright-decorators';
-import { extend } from '@verbaltest/playwright-fixtures';
+import { suite, test, beforeAll, afterAll, beforeEach, afterEach, tag, slow } from '@verbalstream/verbaltest-playwright-decorators';
+import { extend } from '@verbalstream/verbaltest-playwright-fixtures';
 
 // Example of a basic test suite using decorators
 @suite()

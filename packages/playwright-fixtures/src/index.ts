@@ -2,4 +2,4 @@
 export * from './extend';
 
 // Re-export types from core
-export * from '@verbaltest/playwright-core';
+export * from '@verbalstream/verbaltest-playwright-core';

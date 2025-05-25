@@ -1,6 +1,6 @@
 import { expect, APIResponse, APIRequestContext, Page } from '@playwright/test';
-import { suite, test } from '@verbaltest/playwright-decorators';
-import { beforeAll, beforeEach, afterEach, afterAll } from '@verbaltest/playwright-decorators';
+import { suite, test } from '@verbalstream/verbaltest-playwright-decorators';
+import { beforeAll, beforeEach, afterEach, afterAll } from '@verbalstream/verbaltest-playwright-decorators';
 import { 
   ApiEndpoint, 
   PathParams, 
@@ -10,7 +10,7 @@ import {
   ExpectStatus,
   ExpectBody,
   ExpectSchema
-} from '@verbaltest/playwright-decorators';
+} from '@verbalstream/verbaltest-playwright-decorators';
 
 // Define a schema for user data
 const userSchema = {

@@ -1,4 +1,4 @@
-import { TestOptions, getMetadataStorage } from '@verbaltest/playwright-core';
+import { TestOptions, getMetadataStorage } from '@verbalstream/verbaltest-playwright-core';
 
 /**
  * Decorator for marking a method as a test

@@ -1,5 +1,5 @@
 {
-  "name": "@verbaltest/playwright-decorators",
+  "name": "@verbalstream/verbaltest-playwright-decorators",
   "version": "0.1.0",
   "description": "TypeScript decorators for Playwright tests",
   "main": "dist/index.js",
@@ -18,8 +18,11 @@
   ],
   "author": "",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
-    "@verbaltest/playwright-core": "workspace:*"
+    "@verbalstream/verbaltest-playwright-core": "workspace:*"
   },
   "peerDependencies": {
     "@playwright/test": "^1.40.0"

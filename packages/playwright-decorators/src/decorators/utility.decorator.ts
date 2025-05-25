@@ -1,5 +1,5 @@
 import { test as baseTest } from '@playwright/test';
-import { getMetadataStorage } from '@verbaltest/playwright-core';
+import { getMetadataStorage } from '@verbalstream/verbaltest-playwright-core';
 
 /**
  * Skip decorator - skips a test or suite

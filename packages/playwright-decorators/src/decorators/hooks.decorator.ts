@@ -1,4 +1,4 @@
-import { HookOptions, getMetadataStorage } from '@verbaltest/playwright-core';
+import { HookOptions, getMetadataStorage } from '@verbalstream/verbaltest-playwright-core';
 
 type TestMethod = (args: any, testInfo?: any) => void | Promise<void>;
 

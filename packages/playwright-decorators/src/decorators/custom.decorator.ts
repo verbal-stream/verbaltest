@@ -8,7 +8,7 @@ import {
   validateMethodDecorator,
   SuiteOptions,
   TestOptions
-} from '@verbaltest/playwright-core';
+} from '@verbalstream/verbaltest-playwright-core';
 
 /**
  * Creates a custom test decorator

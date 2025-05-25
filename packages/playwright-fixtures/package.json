@@ -1,5 +1,5 @@
 {
-  "name": "@verbaltest/playwright-fixtures",
+  "name": "@verbalstream/verbaltest-playwright-fixtures",
   "version": "0.1.0",
   "description": "Custom fixtures support for Playwright meta framework",
   "main": "dist/index.js",
@@ -18,9 +18,12 @@
   ],
   "author": "",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
-    "@verbaltest/playwright-core": "workspace:*",
-    "@verbaltest/playwright-decorators": "workspace:*"
+    "@verbalstream/verbaltest-playwright-core": "workspace:*",
+    "@verbalstream/verbaltest-playwright-decorators": "workspace:*"
   },
   "peerDependencies": {
     "@playwright/test": "^1.40.0"

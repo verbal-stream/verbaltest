@@ -13,8 +13,8 @@
     "@repo/typescript-config": "workspace:*",
     "@playwright/test": "^1.52.0",
     "@types/node": "^22.15.3",
-    "@verbaltest/playwright-core": "workspace:*",
-    "@verbaltest/playwright-decorators": "workspace:*",
-    "@verbaltest/playwright-fixtures": "workspace:*"
+    "@verbalstream/verbaltest-playwright-core": "workspace:*",
+    "@verbalstream/verbaltest-playwright-decorators": "workspace:*",
+    "@verbalstream/verbaltest-playwright-fixtures": "workspace:*"
   }
 }

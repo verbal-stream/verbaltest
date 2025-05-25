@@ -1,5 +1,5 @@
 import { test, TestType } from '@playwright/test';
-import { SuiteOptions, getName, getMetadataStorage } from '@verbaltest/playwright-core';
+import { SuiteOptions, getName, getMetadataStorage } from '@verbalstream/verbaltest-playwright-core';
 import { processApiRequest } from '../helpers/api-helper';
 
 // Store test suites to avoid duplicate registration

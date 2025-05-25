@@ -15,4 +15,4 @@ export { ExpectBody } from './decorators/expect-body.decorator';
 export { ExpectSchema } from './decorators/expect-schema.decorator';
 
 // Re-export types from core
-export * from '@verbaltest/playwright-core';
+export * from '@verbalstream/verbaltest-playwright-core';

@@ -1,5 +1,5 @@
 {
-  "name": "@verbaltest/playwright-core",
+  "name": "@verbalstream/verbaltest-playwright-core",
   "version": "0.1.0",
   "description": "Core functionality for Playwright meta framework",
   "main": "dist/index.js",
@@ -18,6 +18,9 @@
   ],
   "author": "",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "peerDependencies": {
     "@playwright/test": "^1.40.0"
   },

@@ -1,5 +1,5 @@
 import { test as baseTest, TestInfo } from '@playwright/test';
-import { TestArgs } from '@verbaltest/playwright-core';
+import { TestArgs } from '@verbalstream/verbaltest-playwright-core';
 
 
 

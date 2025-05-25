@@ -1,4 +1,4 @@
-import { getMetadataStorage } from '@verbaltest/playwright-core';
+import { getMetadataStorage } from '@verbalstream/verbaltest-playwright-core';
 
 /**
  * Decorator for expecting a specific status code from an API response
