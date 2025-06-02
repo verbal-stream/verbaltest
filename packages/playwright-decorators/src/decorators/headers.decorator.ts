@@ -48,7 +48,21 @@ export function Headers(headers: Headers) {
       // Set headers
       metadata.options.api.headers = headers;
       
+      // Store metadata in multiple places to ensure it can be retrieved
       getMetadataStorage().store(originalMethod, metadata);
+      
+      // Store on the descriptor value as well
+      getMetadataStorage().store(descriptor.value, metadata);
+      
+      // Store on the prototype method
+      if (propertyKey) {
+        getMetadataStorage().store(target.constructor.prototype[propertyKey], metadata);
+      }
+      
+      // Store on the property key itself
+      if (propertyKey) {
+        getMetadataStorage().store(propertyKey, metadata);
+      }
       
       return descriptor;
     } else {

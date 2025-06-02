@@ -206,63 +206,51 @@ export function suite(options: SuiteOptions = {}) {
             
             // Check if this is an API test with API decorators
             // First try to get API options directly from the method
-            let apiOptions = null;
+            let apiOptions: any = null;
+            const collectedOptions: Record<string, any> = {};
             
             // Enhanced API options retrieval strategy
-            // 1. Try to get from the method function directly
-            const methodFn = prototype[methodName];
-            const methodMetadata = getMetadataStorage().get(methodFn);
+            console.log(`Searching for API options for ${methodName} in all metadata`);
+            const allMetadata = getMetadataStorage().getAll();
             
-            if (methodMetadata?.options?.api) {
-              console.log(`Found API options on method function for ${methodName}`);
-              apiOptions = methodMetadata.options.api;
-            } 
-            // 2. Try to get from test options
-            else if (testOptions.api) {
-              console.log(`Found API options in test options for ${methodName}`);
-              apiOptions = testOptions.api;
+            // Collect all API-related metadata for this method
+            for (const [key, metadata] of allMetadata.entries()) {
+              // Check if this metadata is related to the current method
+              let isRelated = false;
+              
+              // Check by property key name
+              if (typeof key === 'string' || typeof key === 'symbol') {
+                if (String(key) === String(methodName)) {
+                  isRelated = true;
+                }
+              }
+              
+              // Check by function name
+              if (!isRelated && ((typeof key === 'function') || (key && typeof key === 'object' && typeof key.name === 'string'))) {
+                if (key.name === methodName) {
+                  isRelated = true;
+                }
+              }
+              
+              // If this metadata is related to our method and has API options
+              if (isRelated && metadata.options?.api) {
+                // Merge the API options
+                Object.assign(collectedOptions, metadata.options.api);
+                console.log(`Found API options for ${methodName}:`, metadata.options.api);
+              }
             }
-            // 3. Try to get from the property key
-            else {
-              console.log(`Searching for API options for ${methodName} in all metadata`);
-              // Try to find API options from all possible sources
-              const allMetadata = getMetadataStorage().getAll();
-              
-              // First try to match by property key name
-              for (const [key, metadata] of allMetadata.entries()) {
-                // Check if the key is a string or symbol (property key)
-                if (typeof key === 'string' || typeof key === 'symbol') {
-                  if (String(key) === String(methodName) && metadata.options?.api) {
-                    console.log(`Found API options by property key match for ${methodName}`);
-                    apiOptions = metadata.options.api;
-                    break;
-                  }
-                }
-              }
-              
-              // If still not found, try to match by function name
-              if (!apiOptions) {
-                for (const [key, metadata] of allMetadata.entries()) {
-                  // Check if the key is a function
-                  if (typeof key === 'function' || (key && typeof key === 'object' && typeof key.name === 'string')) {
-                    if (key.name === methodName && metadata.options?.api) {
-                      console.log(`Found API options by function name match for ${methodName}`);
-                      apiOptions = metadata.options.api;
-                      break;
-                    }
-                  }
-                }
-              }
-              
-              // If still not found, try to match by prototype method
-              if (!apiOptions) {
-                const prototypeMethod = target.prototype[methodName];
-                const prototypeMetadata = getMetadataStorage().get(prototypeMethod);
-                if (prototypeMetadata?.options?.api) {
-                  console.log(`Found API options on prototype method for ${methodName}`);
-                  apiOptions = prototypeMetadata.options.api;
-                }
-              }
+            
+            // Also check the prototype method
+            const prototypeMethod = target.prototype[methodName];
+            const prototypeMetadata = getMetadataStorage().get(prototypeMethod);
+            if (prototypeMetadata?.options?.api) {
+              Object.assign(collectedOptions, prototypeMetadata.options.api);
+              console.log(`Found API options on prototype method for ${methodName}:`, prototypeMetadata.options.api);
+            }
+            
+            // Check if we found any API options
+            if (Object.keys(collectedOptions).length > 0) {
+              apiOptions = collectedOptions;
             }
             
             console.log(`API options:`, apiOptions);

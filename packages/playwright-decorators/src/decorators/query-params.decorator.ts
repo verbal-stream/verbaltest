@@ -61,6 +61,11 @@ export function QueryParams(params: QueryParams) {
         getMetadataStorage().store(target.constructor.prototype[propertyKey], metadata);
       }
       
+      // Store on the property key itself
+      if (propertyKey) {
+        getMetadataStorage().store(propertyKey, metadata);
+      }
+      
       return descriptor;
     } else if (propertyKey && !descriptor) {
       // Stage 2 decorator (property decorator)

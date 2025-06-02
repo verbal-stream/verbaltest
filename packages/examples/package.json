@@ -6,6 +6,7 @@
   "scripts": {
     "test": "playwright test"
   },
+  "private": true,
   "keywords": [],
   "author": "",
   "license": "ISC",

@@ -58,10 +58,13 @@ export async function processApiRequest(
   let url = options.path;
   if (options.pathParams) {
     console.log('Processing path parameters:', options.pathParams);
+    // Make multiple passes to ensure all occurrences are replaced
     Object.entries(options.pathParams).forEach(([key, value]) => {
       const placeholder = `{${key}}`;
+      // Use global regex to replace all occurrences
+      const regex = new RegExp(`\\{${key}\\}`, 'g');
       if (url.includes(placeholder)) {
-        url = url.replace(placeholder, String(value));
+        url = url.replace(regex, String(value));
         console.log(`Replaced ${placeholder} with ${value}`);
       } else {
         console.warn(`Path parameter ${key} not found in URL: ${url}`);
@@ -99,6 +102,7 @@ export async function processApiRequest(
     if (typeof options.body === 'string') {
       requestOptions.data = options.body;
     } else {
+      // For Playwright, we need to use 'data' for the request body
       requestOptions.data = JSON.stringify(options.body);
       // Set content-type if not already set
       if (!requestOptions.headers['content-type'] && !requestOptions.headers['Content-Type']) {
@@ -114,25 +118,56 @@ export async function processApiRequest(
   let response: APIResponse;
   const method = options.method.toLowerCase();
   
+  // Convert our requestOptions to Playwright's format
+  // Playwright expects { headers, data } format
+  const playwrightOptions: any = {
+    headers: requestOptions.headers || {}
+  };
+  
+  // Handle request body correctly for Playwright
+  if (requestOptions.data) {
+    // Playwright expects JSON data as an object, not a string
+    if (playwrightOptions.headers['Content-Type']?.includes('application/json') || 
+        playwrightOptions.headers['content-type']?.includes('application/json')) {
+      try {
+        // If it's a string that looks like JSON, parse it
+        if (typeof requestOptions.data === 'string') {
+          playwrightOptions.data = JSON.parse(requestOptions.data);
+        } else {
+          // If it's already an object, use it directly
+          playwrightOptions.data = requestOptions.data;
+        }
+      } catch (e) {
+        // If parsing fails, use as is
+        playwrightOptions.data = requestOptions.data;
+      }
+    } else {
+      // For other content types, use as is
+      playwrightOptions.data = requestOptions.data;
+    }
+  }
+  
+  console.log('Making request with Playwright options:', playwrightOptions);
+  
   try {
     switch (method) {
       case 'get':
-        response = await request.get(url, requestOptions);
+        response = await request.get(url, playwrightOptions);
         break;
       case 'post':
-        response = await request.post(url, requestOptions);
+        response = await request.post(url, playwrightOptions);
         break;
       case 'put':
-        response = await request.put(url, requestOptions);
+        response = await request.put(url, playwrightOptions);
         break;
       case 'delete':
-        response = await request.delete(url, requestOptions);
+        response = await request.delete(url, playwrightOptions);
         break;
       case 'patch':
-        response = await request.patch(url, requestOptions);
+        response = await request.patch(url, playwrightOptions);
         break;
       case 'head':
-        response = await request.head(url, requestOptions);
+        response = await request.head(url, playwrightOptions);
         break;
       default:
         throw new Error(`Unsupported HTTP method: ${options.method}`);

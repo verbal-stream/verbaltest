@@ -1,6 +1,6 @@
 {
   "name": "@verbalstream/verbaltest-playwright-fixtures",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Custom fixtures support for Playwright meta framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
